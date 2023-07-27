@@ -42,6 +42,7 @@ describe('[Challenge] Free Rider', function () {
         uniswapFactory = await (new ethers.ContractFactory(factoryJson.abi, factoryJson.bytecode, deployer)).deploy(
             ethers.constants.AddressZero // _feeToSetter
         );
+
         uniswapRouter = await (new ethers.ContractFactory(routerJson.abi, routerJson.bytecode, deployer)).deploy(
             uniswapFactory.address,
             weth.address
@@ -53,6 +54,7 @@ describe('[Challenge] Free Rider', function () {
             uniswapRouter.address,
             UNISWAP_INITIAL_TOKEN_RESERVE
         );
+
         await uniswapRouter.addLiquidityETH(
             token.address,                                              // token to be traded against WETH
             UNISWAP_INITIAL_TOKEN_RESERVE,                              // amountTokenDesired
@@ -67,6 +69,7 @@ describe('[Challenge] Free Rider', function () {
         uniswapPair = await (new ethers.ContractFactory(pairJson.abi, pairJson.bytecode, deployer)).attach(
             await uniswapFactory.getPair(token.address, weth.address)
         );
+
         expect(await uniswapPair.token0()).to.eq(weth.address);
         expect(await uniswapPair.token1()).to.eq(token.address);
         expect(await uniswapPair.balanceOf(deployer.address)).to.be.gt(0);
@@ -80,7 +83,9 @@ describe('[Challenge] Free Rider', function () {
 
         // Deploy NFT contract
         nft = await (await ethers.getContractFactory('DamnValuableNFT', deployer)).attach(await marketplace.token());
+
         expect(await nft.owner()).to.eq(ethers.constants.AddressZero); // ownership renounced
+        
         expect(await nft.rolesOf(marketplace.address)).to.eq(await nft.MINTER_ROLE());
 
         // Ensure deployer owns all minted NFTs. Then approve the marketplace to trade them.

