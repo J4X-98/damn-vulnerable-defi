@@ -34,6 +34,7 @@ contract AttackV2Puppet{
         dvt.transferFrom(msg.sender, address(this), dvt.balanceOf(msg.sender));
         weth.transferFrom(msg.sender, address(this), weth.balanceOf(msg.sender));
 
+        //We do this until we have no more tokens in the pool
         while (dvt.balanceOf(address(pool)) > 0)
         {
             console.log("------------------------------------------------------");
