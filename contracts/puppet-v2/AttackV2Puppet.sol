@@ -53,7 +53,6 @@ contract AttackV2Puppet{
         uint256 max_lend = maxLend(weth.balanceOf(address(this)));
 
         //we need to exactly calculate how to get the rest out
-        console.log("Final Lending");
 
         //calculate how much weth we need to send to get the rest of the tokens out
         uint256 final_value_sent = neededCollateral(dvt.balanceOf(address(pool)));
